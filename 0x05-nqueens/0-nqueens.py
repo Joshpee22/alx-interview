@@ -1,9 +1,7 @@
 #!/usr/bin/python3
 """N Queens placement on NxN chessboard"""
 
-
 import sys
-
 
 def generate_solutions(row, column):
     solution = [[]]
@@ -11,23 +9,16 @@ def generate_solutions(row, column):
         solution = place_queen(queen, column, solution)
     return solution
 
-
 def place_queen(queen, column, prev_solution):
     safe_position = []
     for array in prev_solution:
         for x in range(column):
             if is_safe(queen, x, array):
-                safe_position.append(array + [x])
+                safe_position.append(array + [(queen, x)])
     return safe_position
 
-
 def is_safe(q, x, array):
-    if x in array:
-        return (False)
-    else:
-        return all(abs(array[column] - x) != q - column
-                   for column in range(q))
-
+    return x not in (col for (_, col) in array) and all(abs(col - x) != q - i for i, (row, col) in enumerate(array))
 
 def init():
     if len(sys.argv) != 2:
@@ -41,21 +32,23 @@ def init():
     if n < 4:
         print("N must be at least 4")
         sys.exit(1)
-    return (n)
+    return n
 
+def print_solution(array):
+    for q, x in array:
+        line = "." * x + "Q" + "." * (len(array) - x - 1)
+        print(line)
+    print()
+
+def print_solutions(solutions):
+    for array in solutions:
+        print_solution(array)
 
 def n_queens():
-
     n = init()
-    # generate all solutions
     solutions = generate_solutions(n, n)
-    # print solutions
-    for array in solutions:
-        clean = []
-        for q, x in enumerate(array):
-            clean.append([q, x])
-        print(clean)
-
+    print_solutions(solutions)
 
 if __name__ == '__main__':
     n_queens()
+
