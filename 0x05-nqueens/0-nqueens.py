@@ -1,43 +1,61 @@
 #!/usr/bin/python3
-'''
-Module that solves the N Queens puzzle
-'''
-from sys import argv, exit
+"""N Queens placement on NxN chessboard"""
 
-if __name__ == "__main__":
-    if len(argv) != 2:
-        print('Usage: nqueens N')
-        exit(1)
-    try:
-        n = int(argv[1])
-    except BaseException:
-        print('N must be a number')
-        exit(1)
+
+import sys
+
+
+def generate_solutions(row, column):
+    solution = [[]]
+    for queen in range(row):
+        solution = place_queen(queen, column, solution)
+    return solution
+
+
+def place_queen(queen, column, prev_solution):
+    safe_position = []
+    for array in prev_solution:
+        for x in range(column):
+            if is_safe(queen, x, array):
+                safe_position.append(array + [x])
+    return safe_position
+
+
+def is_safe(q, x, array):
+    if x in array:
+        return (False)
+    else:
+        return all(abs(array[column] - x) != q - column
+                   for column in range(q))
+
+
+def init():
+    if len(sys.argv) != 2:
+        print("Usage: nqueens N")
+        sys.exit(1)
+    if sys.argv[1].isdigit():
+        n = int(sys.argv[1])
+    else:
+        print("N must be a number")
+        sys.exit(1)
     if n < 4:
-        print('N must be at least 4')
-        exit(1)
+        print("N must be at least 4")
+        sys.exit(1)
+    return (n)
 
-    solution = []
 
-    def solve_queens(row, n, solution):
-        if (row == n):
-            print(solution)
-        else:
-            for col in range(n):
-                placement = [row, col]
-                if valid_placement(solution, placement):
-                    solution.append(placement)
-                    solve_queens(row + 1, n, solution)
-                    solution.remove(placement)
+def n_queens():
 
-    def valid_placement(solution, placement):
-        for queen in solution:
-            if queen[1] == placement[1]:
-                return False
-            if (queen[0] + queen[1]) == (placement[0] + placement[1]):
-                return False
-            if (queen[0] - queen[1]) == (placement[0] - placement[1]):
-                return False
-        return True
+    n = init()
+    # generate all solutions
+    solutions = generate_solutions(n, n)
+    # print solutions
+    for array in solutions:
+        clean = []
+        for q, x in enumerate(array):
+            clean.append([q, x])
+        print(clean)
 
-    solve_queens(0, n, solution)
+
+if __name__ == '__main__':
+    n_queens()
