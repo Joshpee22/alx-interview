@@ -1,39 +1,41 @@
 #!/usr/bin/node
-
-/**
- * Prints all characters of a Star Wars movie
- */
-
-const myArgs = process.argv.slice(2);
 const request = require('request');
-const url = 'https://swapi-api.hbtn.io/api/films/' + myArgs[0];
 
-request(url, async function (error, response, body) {
+const id = process.argv[2];
+
+const url = `https://swapi-api.alx-tools.com/api/films/${id}`;
+
+function getReq (url) {
+  const res = new Promise(function (resolve, reject) {
+    request(url, function (error, response, body) {
+      if (error) {
+        // pass
+      }
+
+      if (response.statusCode === 200) {
+        const person = JSON.parse(body);
+        resolve(person.name);
+      } else {
+        reject(response);
+      }
+    });
+  });
+  return res;
+}
+
+request(url, function (error, response, body) {
   if (error) {
-    console.error('Error:', error);
-    process.exit(1);
+    // pass
   }
+  const film = JSON.parse(body);
+  const characters = film.characters;
 
-  const json = JSON.parse(body);
-  const endpoints = json.characters;
-
-  // Use Promise.all for concurrent requests
-  await Promise.all(endpoints.map(async (endpoint) => {
-    try {
-      const characterBody = await new Promise((resolve, reject) => {
-        request(endpoint, (error, response, body) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(body);
-          }
-        });
-      });
-
-      console.log(JSON.parse(characterBody).name);
-    } catch (error) {
-      console.error('Error fetching character:', error);
-    }
-  }));
+  const promises = characters.map(character => getReq(character));
+  Promise.all(promises)
+    .then(results => {
+      results.forEach(result => console.log(result));
+    })
+    .catch(error => {
+      console.log(error);
+    });
 });
-
